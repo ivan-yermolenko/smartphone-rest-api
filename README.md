@@ -22,7 +22,7 @@ The database schema is optimized for simplicity, performance, and compatibility 
 - **Fast Filtering & Lookups**: Columns like `brand` and `title` are indexed since the API may require filtering by these fields (e.g., `?brand=Apple`). The `sku` column is marked unique to ensure data integrity during product creation and updates.
 
 > [!NOTE]
-> *For a complete reference of all database columns and their types, please see the **[Appendix: Full Database Schema](#appendix-full-database-schema)** at the end of this file.*
+> *For a complete reference of all database columns and their types, please see **[Appendix A: Full Database Schema](#appendix-a-full-database-schema)** at the end of this file.*
 
 ## Organizing the Laravel application
 
@@ -41,7 +41,7 @@ The application is structured following clean architecture principles, keeping c
 Automation scripts are included to deploy the project quickly across different operating systems.
 
 > [!NOTE]
-> *If you prefer to configure everything manually, step-by-step instructions can be found at the **[end of this file](#manual-installation-alternative)**.*
+> *If you prefer to configure everything manually, step-by-step instructions can be found in **[Appendix B: Manual Installation (Alternative)](#appendix-b-manual-installation-alternative)**.*
 
 ###  macOS / Linux / Windows (WSL2)
 Use the included `Makefile`:
@@ -126,53 +126,11 @@ Or manually via Docker:
 docker compose exec app ./vendor/bin/pint
 ```
 
----
 
-## Manual Installation (Alternative)
 
-If you prefer to run commands manually, follow these steps:
+## Appendices
 
-### 1. Environment Setup
-Clone the repository and copy the environment configuration file:
-```bash
-cp .env.example .env
-```
-
-### 2. Start Docker Containers
-Bring up the containers in detached mode:
-```bash
-docker compose up -d
-```
-This starts:
-- Nginx Web Server mapped to host port **`8080`**.
-- MySQL Database mapped to host port **`33060`**.
-
-### 3. Install Dependencies & Generate Key
-Install PHP dependencies inside the container:
-```bash
-docker compose exec app composer install
-```
-
-Generate the application key:
-```bash
-docker compose exec app php artisan key:generate
-```
-
-### 4. Adjust Directory Permissions (If needed)
-If you encounter permission errors with cache or logs, run:
-```bash
-chmod -R 777 storage bootstrap/cache
-```
-
-### 5. Run Database Migrations
-Create the database tables:
-```bash
-docker compose exec app php artisan migrate
-```
-
----
-
-## Appendix: Full Database Schema
+### Appendix A: Full Database Schema
 
 Below is the complete reference of all columns in the `products` table:
 
@@ -202,3 +160,47 @@ Below is the complete reference of all columns in the `products` table:
 | `thumbnail` | String (500) | Nullable |
 | `images` | JSON | Nullable |
 | `created_at` / `updated_at`| Timestamp | |
+
+---
+
+### Appendix B: Manual Installation (Alternative)
+
+If you prefer to run commands manually, follow these steps:
+
+#### 1. Environment Setup
+Clone the repository and copy the environment configuration file:
+```bash
+cp .env.example .env
+```
+
+#### 2. Start Docker Containers
+Bring up the containers in detached mode:
+```bash
+docker compose up -d
+```
+This starts:
+- Nginx Web Server mapped to host port **`8080`**.
+- MySQL Database mapped to host port **`33060`**.
+
+#### 3. Install Dependencies & Generate Key
+Install PHP dependencies inside the container:
+```bash
+docker compose exec app composer install
+```
+
+Generate the application key:
+```bash
+docker compose exec app php artisan key:generate
+```
+
+#### 4. Adjust Directory Permissions (If needed)
+If you encounter permission errors with cache or logs, run:
+```bash
+chmod -R 777 storage bootstrap/cache
+```
+
+#### 5. Run Database Migrations
+Create the database tables:
+```bash
+docker compose exec app php artisan migrate
+```
