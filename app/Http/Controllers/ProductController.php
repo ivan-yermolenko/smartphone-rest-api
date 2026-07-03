@@ -10,6 +10,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 
 final class ProductController extends Controller
 {
@@ -37,5 +38,12 @@ final class ProductController extends Controller
         $product->update($request->validated());
 
         return new ProductResource($product);
+    }
+
+    public function destroy(Product $product): Response
+    {
+        $product->delete();
+
+        return response()->noContent();
     }
 }

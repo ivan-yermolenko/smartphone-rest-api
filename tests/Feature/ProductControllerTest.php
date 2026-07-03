@@ -152,4 +152,17 @@ final class ProductControllerTest extends TestCase
         $response2->assertStatus(422)
             ->assertJsonValidationErrors(['sku']);
     }
+
+    public function test_it_can_delete_a_product(): void
+    {
+        $product = Product::factory()->create();
+
+        $response = $this->deleteJson("/api/products/{$product->id}");
+
+        $response->assertStatus(204);
+
+        $this->assertDatabaseMissing('products', [
+            'id' => $product->id,
+        ]);
+    }
 }
