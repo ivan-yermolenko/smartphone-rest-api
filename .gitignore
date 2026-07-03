@@ -26,4 +26,8 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
-/.agents/
+/.agents/*
+!/.agents/AGENTS.md
+
+# Ignore other active agent directories
+/.claude/
