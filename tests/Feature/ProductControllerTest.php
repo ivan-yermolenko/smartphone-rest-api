@@ -83,4 +83,35 @@ final class ProductControllerTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_it_can_create_a_product(): void
+    {
+        $payload = [
+            'title' => 'New Smartphone',
+            'description' => 'A great new phone',
+            'price' => 599.99,
+            'stock' => 10,
+            'brand' => 'BrandNew',
+            'sku' => 'NEW-SMART-001',
+        ];
+
+        $response = $this->postJson('/api/products', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.title', 'New Smartphone')
+            ->assertJsonPath('data.brand', 'BrandNew');
+
+        $this->assertDatabaseHas('products', [
+            'title' => 'New Smartphone',
+            'sku' => 'NEW-SMART-001',
+        ]);
+    }
+
+    public function test_it_validates_required_fields_when_creating(): void
+    {
+        $response = $this->postJson('/api/products');
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['title', 'description', 'price']);
+    }
 }
