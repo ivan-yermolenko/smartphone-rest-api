@@ -63,4 +63,24 @@ final class ProductControllerTest extends TestCase
         $response->assertStatus(200);
         $this->assertCount(0, $response->json('data'));
     }
+
+    public function test_it_can_get_a_single_product(): void
+    {
+        $product = Product::factory()->create([
+            'title' => 'iPhone X',
+        ]);
+
+        $response = $this->getJson("/api/products/{$product->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.id', $product->id)
+            ->assertJsonPath('data.title', 'iPhone X');
+    }
+
+    public function test_it_returns_404_when_product_not_found(): void
+    {
+        $response = $this->getJson('/api/products/999');
+
+        $response->assertStatus(404);
+    }
 }
