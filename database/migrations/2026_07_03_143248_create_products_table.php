@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('external_id')->nullable()->unique();
-            $table->string('title');
+            $table->string('title')->index();
             $table->text('description');
             $table->string('category', 100)->default('smartphones');
             $table->decimal('price', 10);

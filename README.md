@@ -1,13 +1,35 @@
-# Appflame Smartphone REST API
+# Smartphone Inventory REST API
 
-This project is a test task implementing a RESTful API for managing smartphones using PHP 8.2+ and Laravel 11. It is designed strictly as a backend REST API (API-only) with no frontend assets, Node packages, or Blade templates.
+This project is a test task implementing a RESTful API for managing smartphones. It is built using PHP 8.4+ and Laravel 11, strictly designed as a backend REST API (API-only) with no frontend assets, Node packages, or Blade templates.
 
-## Main Stack
-- **PHP**: 8.2+ (Strict types enforced with `declare(strict_types=1)`)
-- **Laravel**: 11.x
-- **Database**: MySQL 8.0
-- **Containerization**: Docker & Docker Compose
-- **Code Style**: Laravel Pint
+## What the project does and how it is structured
+
+The API provides endpoints to perform CRUD (Create, Read, Update, Delete) operations on smartphone records. It also includes an idempotent seeding mechanism to fetch and synchronize products from an external API (DummyJSON).
+
+**Core Features:**
+- Full REST CRUD operations for products.
+- External API synchronization.
+- JSON-only responses (including 404/405 errors).
+- Strict typing and isolated service layers.
+
+## The database schema
+
+The database schema is optimized for simplicity, performance, and compatibility with the external data source. Instead of listing every column, here are the key architectural decisions regarding the `products` table:
+
+- **`external_id` for Synchronization**: We use an `external_id` column to store the ID from the DummyJSON API. This allows the `/api/products/seed` endpoint to be idempotent—it checks for existing records by `external_id` and updates them rather than creating duplicates during repeated syncs.
+- **`reviews` as a JSON Column**: The test task data provides reviews as an array of objects within each product. Since the API only needs to return these reviews along with the product and does not require complex relational queries (like filtering all products by a specific review author), storing `reviews` as a `JSON` column avoids unnecessary relational overhead and `JOIN` operations. This perfectly fits the NoSQL-like nested structure while still leveraging MySQL's robust JSON capabilities.
+- **Other JSON Fields (`tags`, `dimensions`, `meta`, `images`)**: Similar to `reviews`, these fields are stored natively as JSON to preserve the nested structure of the external API without overcomplicating the schema.
+- **Fast Filtering & Lookups**: Columns like `brand` and `title` are indexed since the API may require filtering by these fields (e.g., `?brand=Apple`). The `sku` column is marked unique to ensure data integrity during product creation and updates.
+
+## Organizing the Laravel application
+
+The application is structured following clean architecture principles, keeping controllers thin and strictly typed:
+
+- **Strict Types & Final Classes**: Every class (Controllers, Models, Requests, Services) is declared `final` and enforces `declare(strict_types=1);` to prevent inheritance and ensure type safety.
+- **Service Layer**: External API calls and data mapping logic are decoupled from controllers into a dedicated `DummyJsonService`. This prevents the `ProductController` from being bloated with third-party integration logic.
+- **Form Requests**: Request validation is handled via dedicated `FormRequest` classes (e.g., `StoreProductRequest`, `UpdateProductRequest`), keeping validation out of the controllers.
+- **Eloquent Local Scopes**: Query filtering (like `?brand=Apple`) is encapsulated in the model (`scopeOfBrand`) instead of cluttering the controller logic.
+- **Route Constraints**: API routes use strict constraints (e.g., `->whereNumber('product')`) to ensure valid parameters and prevent routing collisions.
 
 ---
 
@@ -88,16 +110,6 @@ All PHP files comply with PSR-12 and Laravel style guidelines. You can check or 
 ```bash
 docker compose exec app ./vendor/bin/pint
 ```
-
----
-
-## Architectural Highlights
-- **Closed Classes**: All key classes (controllers, models, resources, request classes, and services) are declared `final` to prevent accidental inheritance.
-- **Service Layer**: Third-party API integration and data mapping are decoupled from controllers into a dedicated `DummyJsonService` class.
-- **Route Constraints**: Numeric route parameters are strictly validated with `->whereNumber('product')` to prevent clashes (e.g. with `/products/seed`) and return fast 404s.
-- **Eloquent Scopes**: Brand filtering query logic is encapsulated inside the model using a local scope `scopeOfBrand` (`Product::ofBrand()`).
-- **IDE Helpers**: Model fields and magic static methods (such as `create()`, `updateOrCreate()`, and scopes) are documented in the model's PHPDoc block.
-- **Error Handling**: API exceptions like `NotFoundHttpException` (404) and `MethodNotAllowedHttpException` (405) are captured globally in `bootstrap/app.php` and returned in a unified JSON format.
 
 ---
 
