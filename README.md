@@ -1,6 +1,6 @@
 # Smartphone Inventory REST API
 
-This project is a test task implementing a RESTful API for managing smartphones. It is built using PHP 8.4+ and Laravel 11, strictly designed as a backend REST API (API-only) with no frontend assets, Node packages, or Blade templates.
+This project is a test task implementing a RESTful API for managing smartphones. It is built using PHP 8.4 and Laravel 11, strictly designed as a backend REST API (API-only) with no frontend assets, Node packages, or Blade templates.
 
 ## What the project does and how it is structured
 
