@@ -114,4 +114,42 @@ final class ProductControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['title', 'description', 'price']);
     }
+
+    public function test_it_can_update_a_product(): void
+    {
+        $product = Product::factory()->create([
+            'title' => 'Old Title',
+            'price' => 100.00,
+        ]);
+
+        $payload = [
+            'title' => 'Updated Title',
+            'price' => 150.00,
+        ];
+
+        $response = $this->patchJson("/api/products/{$product->id}", $payload);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.title', 'Updated Title')
+            ->assertJsonPath('data.price', 150);
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'title' => 'Updated Title',
+            'price' => 150.00,
+        ]);
+    }
+
+    public function test_it_validates_unique_sku_ignoring_self_when_updating(): void
+    {
+        $product1 = Product::factory()->create(['sku' => 'SKU-001']);
+        $product2 = Product::factory()->create(['sku' => 'SKU-002']);
+
+        $response1 = $this->patchJson("/api/products/{$product1->id}", ['sku' => $product1->sku]);
+        $response1->assertStatus(200);
+
+        $response2 = $this->patchJson("/api/products/{$product1->id}", ['sku' => $product2->sku]);
+        $response2->assertStatus(422)
+            ->assertJsonValidationErrors(['sku']);
+    }
 }
