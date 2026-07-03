@@ -21,6 +21,9 @@ The database schema is optimized for simplicity, performance, and compatibility 
 - **Other JSON Fields (`tags`, `dimensions`, `meta`, `images`)**: Similar to `reviews`, these fields are stored natively as JSON to preserve the nested structure of the external API without overcomplicating the schema.
 - **Fast Filtering & Lookups**: Columns like `brand` and `title` are indexed since the API may require filtering by these fields (e.g., `?brand=Apple`). The `sku` column is marked unique to ensure data integrity during product creation and updates.
 
+> [!NOTE]
+> *For a complete reference of all database columns and their types, please see the **[Appendix: Full Database Schema](#appendix-full-database-schema)** at the end of this file.*
+
 ## Organizing the Laravel application
 
 The application is structured following clean architecture principles, keeping controllers thin and strictly typed:
@@ -101,12 +104,24 @@ All requests return structured JSON payloads by default.
 
 ### Running Tests
 The project features integration tests (Feature tests) verifying all API actions, request validations, and external API mocking via `Http::fake()`:
+
+Using `make`:
+```bash
+make test
+```
+Or manually via Docker:
 ```bash
 docker compose exec app php artisan test
 ```
 
 ### Code Formatting (Linter)
 All PHP files comply with PSR-12 and Laravel style guidelines. You can check or format your files with Pint:
+
+Using `make`:
+```bash
+make pint
+```
+Or manually via Docker:
 ```bash
 docker compose exec app ./vendor/bin/pint
 ```
@@ -154,3 +169,36 @@ Create the database tables:
 ```bash
 docker compose exec app php artisan migrate
 ```
+
+---
+
+## Appendix: Full Database Schema
+
+Below is the complete reference of all columns in the `products` table:
+
+| Column | Type | Attributes / Description |
+| :--- | :--- | :--- |
+| `id` | BigInteger | Primary Key |
+| `external_id` | BigInteger | Nullable, Unique |
+| `title` | String | Indexed |
+| `description` | Text | |
+| `category` | String (100) | Default: 'smartphones' |
+| `price` | Decimal (10, 2) | |
+| `discount_percentage` | Decimal (5, 2) | Nullable |
+| `rating` | Decimal (3, 2) | Nullable |
+| `stock` | Integer | Default: 0 |
+| `brand` | String (100) | Nullable, Indexed |
+| `sku` | String (100) | Nullable, Unique |
+| `tags` | JSON | Nullable |
+| `weight` | Decimal | Nullable |
+| `dimensions` | JSON | Nullable |
+| `warranty_information` | String | Nullable |
+| `shipping_information` | String | Nullable |
+| `availability_status` | String (50) | Nullable |
+| `return_policy` | String | Nullable |
+| `minimum_order_quantity` | Integer | Nullable |
+| `meta` | JSON | Nullable |
+| `reviews` | JSON | Nullable |
+| `thumbnail` | String (500) | Nullable |
+| `images` | JSON | Nullable |
+| `created_at` / `updated_at`| Timestamp | |
