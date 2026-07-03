@@ -83,7 +83,22 @@ final class ProductControllerTest extends TestCase
     {
         $response = $this->getJson('/api/products/999');
 
-        $response->assertStatus(404);
+        $response->assertStatus(404)
+            ->assertJson([
+                'success' => false,
+                'error' => 'Resource not found',
+            ]);
+    }
+
+    public function test_it_returns_405_when_method_not_allowed(): void
+    {
+        $response = $this->postJson('/api/products/1');
+
+        $response->assertStatus(405)
+            ->assertJson([
+                'success' => false,
+                'error' => 'Method not allowed',
+            ]);
     }
 
     public function test_it_can_create_a_product(): void
