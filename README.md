@@ -1,58 +1,144 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Appflame Smartphone REST API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project is a test task implementing a RESTful API for managing smartphones using PHP 8.2+ and Laravel 11. It is designed strictly as a backend REST API (API-only) with no frontend assets, Node packages, or Blade templates.
 
-## About Laravel
+## Main Stack
+- **PHP**: 8.2+ (Strict types enforced with `declare(strict_types=1)`)
+- **Laravel**: 11.x
+- **Database**: MySQL 8.0
+- **Containerization**: Docker & Docker Compose
+- **Code Style**: Laravel Pint
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Quick Start (Automation Scripts)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Automation scripts are included to deploy the project quickly across different operating systems.
 
-## Learning Laravel
+> [!NOTE]
+> *If you prefer to configure everything manually, step-by-step instructions can be found at the **[end of this file](#manual-installation-alternative)**.*
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+###  macOS / Linux / Windows (WSL2)
+Use the included `Makefile`:
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+make setup
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+This command automatically:
+1. Copies `.env.example` to `.env` (if it does not exist yet).
+2. Starts Docker containers in the background (`docker compose up -d`).
+3. Installs Composer dependencies inside the app container.
+4. Generates a unique application key (`key:generate`).
+5. Runs database migrations.
 
-## Contributing
+Once completed, you can sync/seed products from the DummyJSON API:
+```bash
+make seed
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Other Makefile Commands:
+- **`make start`** — Start Docker containers.
+- **`make stop`** — Stop Docker containers (`docker compose down`).
+- **`make test`** — Run all feature/unit tests.
+- **`make pint`** — Run Laravel Pint code style formatter.
 
-## Code of Conduct
+### ❖ Windows (Native CMD / PowerShell)
+Run the batch script directly in your terminal:
+```cmd
+setup.bat
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## Database Connection from Host (PhpStorm / DBeaver)
+To inspect the database using an IDE or external tool, use the following credentials:
+- **Host**: `localhost` (or `127.0.0.1`)
+- **Port**: `33060` (the mapped external port)
+- **Database**: `appflame`
+- **Username**: `appflame`
+- **Password**: `secret`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## API Endpoints
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+All requests return structured JSON payloads by default.
+
+| Method | Path | Description |
+| :--- | :--- | :--- |
+| **POST** | `/api/products/seed` | Import and synchronize smartphones from the DummyJSON API (Idempotent). |
+| **GET** | `/api/products` | Retrieve a list of products (Paginated, filterable by `?brand=Apple`). |
+| **GET** | `/api/products/{id}` | Retrieve detailed information for a product by its numeric ID. |
+| **POST** | `/api/products` | Create a new product (with full request validation). |
+| **PATCH** | `/api/products/{id}` | Partially update a product by ID (with unique SKU check ignoring self). |
+| **DELETE** | `/api/products/{id}` | Delete a product by ID (returns 204 No Content). |
+
+---
+
+## Testing & Code Quality
+
+### Running Tests
+The project features integration tests (Feature tests) verifying all API actions, request validations, and external API mocking via `Http::fake()`:
+```bash
+docker compose exec app php artisan test
+```
+
+### Code Formatting (Linter)
+All PHP files comply with PSR-12 and Laravel style guidelines. You can check or format your files with Pint:
+```bash
+docker compose exec app ./vendor/bin/pint
+```
+
+---
+
+## Architectural Highlights
+- **Closed Classes**: All key classes (controllers, models, resources, request classes, and services) are declared `final` to prevent accidental inheritance.
+- **Service Layer**: Third-party API integration and data mapping are decoupled from controllers into a dedicated `DummyJsonService` class.
+- **Route Constraints**: Numeric route parameters are strictly validated with `->whereNumber('product')` to prevent clashes (e.g. with `/products/seed`) and return fast 404s.
+- **Eloquent Scopes**: Brand filtering query logic is encapsulated inside the model using a local scope `scopeOfBrand` (`Product::ofBrand()`).
+- **IDE Helpers**: Model fields and magic static methods (such as `create()`, `updateOrCreate()`, and scopes) are documented in the model's PHPDoc block.
+- **Error Handling**: API exceptions like `NotFoundHttpException` (404) and `MethodNotAllowedHttpException` (405) are captured globally in `bootstrap/app.php` and returned in a unified JSON format.
+
+---
+
+## Manual Installation (Alternative)
+
+If you prefer to run commands manually, follow these steps:
+
+### 1. Environment Setup
+Clone the repository and copy the environment configuration file:
+```bash
+cp .env.example .env
+```
+
+### 2. Start Docker Containers
+Bring up the containers in detached mode:
+```bash
+docker compose up -d
+```
+This starts:
+- Nginx Web Server mapped to host port **`8080`**.
+- MySQL Database mapped to host port **`33060`**.
+
+### 3. Install Dependencies & Generate Key
+Install PHP dependencies inside the container:
+```bash
+docker compose exec app composer install
+```
+
+Generate the application key:
+```bash
+docker compose exec app php artisan key:generate
+```
+
+### 4. Adjust Directory Permissions (If needed)
+If you encounter permission errors with cache or logs, run:
+```bash
+chmod -R 777 storage bootstrap/cache
+```
+
+### 5. Run Database Migrations
+Create the database tables:
+```bash
+docker compose exec app php artisan migrate
+```
