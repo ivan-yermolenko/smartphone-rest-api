@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Product>
+ * @extends Factory<Product>
  */
 class ProductFactory extends Factory
 {
@@ -48,7 +49,7 @@ class ProductFactory extends Factory
                     'rating' => 5,
                     'comment' => 'Great phone!',
                     'reviewerName' => $this->faker->name(),
-                ]
+                ],
             ],
             'thumbnail' => $this->faker->imageUrl(),
             'images' => [

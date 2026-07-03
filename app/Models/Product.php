@@ -1,11 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
-class Product extends Model
+/**
+ * @property int $id
+ * @property int|null $external_id
+ * @property string $title
+ * @property string $description
+ * @property string $category
+ * @property string $price
+ * @property string|null $discount_percentage
+ * @property string|null $rating
+ * @property int $stock
+ * @property string|null $brand
+ * @property string|null $sku
+ * @property array|null $tags
+ * @property string|null $weight
+ * @property array|null $dimensions
+ * @property string|null $warranty_information
+ * @property string|null $shipping_information
+ * @property string|null $availability_status
+ * @property string|null $return_policy
+ * @property int|null $minimum_order_quantity
+ * @property array|null $meta
+ * @property array|null $reviews
+ * @property string|null $thumbnail
+ * @property array|null $images
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ *
+ * @method static Builder|Product ofBrand(?string $brand)
+ */
+final class Product extends Model
 {
     use HasFactory;
 
@@ -50,5 +83,10 @@ class Product extends Model
             'reviews' => 'array',
             'images' => 'array',
         ];
+    }
+
+    public function scopeOfBrand(Builder $query, ?string $brand): Builder
+    {
+        return $query->when($brand, fn (Builder $q) => $q->where('brand', $brand));
     }
 }
