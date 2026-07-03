@@ -38,6 +38,7 @@ use Illuminate\Support\Carbon;
  *
  * @method static Builder|Product ofBrand(?string $brand)
  * @method static Product create(array $attributes = [])
+ * @method static Product updateOrCreate(array $attributes, array $values = [])
  */
 final class Product extends Model
 {

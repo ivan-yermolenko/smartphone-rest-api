@@ -6,6 +6,8 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 final class ProductControllerTest extends TestCase
@@ -164,5 +166,87 @@ final class ProductControllerTest extends TestCase
         $this->assertDatabaseMissing('products', [
             'id' => $product->id,
         ]);
+    }
+
+    public function test_it_can_seed_products_from_dummyjson_api(): void
+    {
+        Http::fake([
+            'https://dummyjson.com/products/category/smartphones' => Http::response([
+                'products' => [
+                    [
+                        'id' => 121,
+                        'title' => 'iPhone 5s Dummy',
+                        'description' => 'A classic phone',
+                        'category' => 'smartphones',
+                        'price' => 199.99,
+                        'discountPercentage' => 12.91,
+                        'rating' => 2.83,
+                        'stock' => 25,
+                        'brand' => 'Apple',
+                        'sku' => 'SMA-APP-IPH-121',
+                        'tags' => ['smartphones', 'apple'],
+                        'weight' => 2,
+                        'dimensions' => [
+                            'width' => 5.29,
+                            'height' => 18.38,
+                            'depth' => 17.72,
+                        ],
+                        'warrantyInformation' => '1 month warranty',
+                        'shippingInformation' => 'Ships in 1 week',
+                        'availabilityStatus' => 'In Stock',
+                        'returnPolicy' => 'No returns',
+                        'minimumOrderQuantity' => 1,
+                        'meta' => [
+                            'createdAt' => '2024-05-23T08:56:21.618Z',
+                            'updatedAt' => '2024-05-23T08:56:21.618Z',
+                            'barcode' => '123456789',
+                            'qrCode' => 'qrcode-url',
+                        ],
+                        'reviews' => [],
+                        'thumbnail' => 'thumbnail-url',
+                        'images' => ['image-url'],
+                    ],
+                ],
+                'total' => 1,
+                'skip' => 0,
+                'limit' => 1,
+            ]),
+        ]);
+
+        $response = $this->postJson('/api/products/seed');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('imported', 1);
+
+        $this->assertDatabaseHas('products', [
+            'external_id' => 121,
+            'title' => 'iPhone 5s Dummy',
+            'sku' => 'SMA-APP-IPH-121',
+            'brand' => 'Apple',
+        ]);
+
+        Http::assertSent(function (Request $request) {
+            return $request->url() === 'https://dummyjson.com/products/category/smartphones'
+                && $request->method() === 'GET';
+        });
+    }
+
+    public function test_it_handles_api_failure_during_seed(): void
+    {
+        Http::fake([
+            'https://dummyjson.com/products/category/smartphones' => Http::response([], 500),
+        ]);
+
+        $response = $this->postJson('/api/products/seed');
+
+        $response->assertStatus(502)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('error', 'Failed to fetch products from external API');
+
+        Http::assertSent(function (Request $request) {
+            return $request->url() === 'https://dummyjson.com/products/category/smartphones'
+                && $request->method() === 'GET';
+        });
     }
 }

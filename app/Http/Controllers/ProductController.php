@@ -8,9 +8,12 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Services\DummyJsonService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use RuntimeException;
 
 final class ProductController extends Controller
 {
@@ -45,5 +48,22 @@ final class ProductController extends Controller
         $product->delete();
 
         return response()->noContent();
+    }
+
+    public function seed(DummyJsonService $service): JsonResponse
+    {
+        try {
+            $importedCount = $service->importProducts();
+
+            return response()->json([
+                'success' => true,
+                'imported' => $importedCount,
+            ]);
+        } catch (RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 502);
+        }
     }
 }

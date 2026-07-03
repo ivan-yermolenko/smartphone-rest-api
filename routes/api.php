@@ -9,7 +9,8 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{product}', [ProductController::class, 'show']);
+Route::post('/products/seed', [ProductController::class, 'seed']);
 Route::post('/products', [ProductController::class, 'store']);
-Route::patch('/products/{product}', [ProductController::class, 'update']);
-Route::delete('/products/{product}', [ProductController::class, 'destroy']);
+Route::get('/products/{product}', [ProductController::class, 'show'])->whereNumber('product');
+Route::patch('/products/{product}', [ProductController::class, 'update'])->whereNumber('product');
+Route::delete('/products/{product}', [ProductController::class, 'destroy'])->whereNumber('product');
