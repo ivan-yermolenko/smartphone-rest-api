@@ -1,7 +1,7 @@
 # Project Rules & Style Guidelines
 
 ## Core Stack & Infrastructure
-- **Stack**: PHP 8.2+, Laravel 11, MySQL database.
+- **Stack**: PHP 8.4+, Laravel 13, MySQL database.
 - **Docker Ports**:
   - Web Server (Nginx): Mapped to host port `8080`.
   - Database (MySQL): Mapped to host port `33060`.
